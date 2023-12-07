@@ -1,0 +1,73 @@
+---
+title: "dota2Analytic"
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+
+```{python}
+import json
+
+# abrindo o arquivo
+with open("heroes.json", "r") as f:
+    # lendo e desserializando o conteúdo do arquivo
+    data = json.load(f)
+
+heroes = data["heroes"]
+print(heroes)
+print(len(heroes))
+
+```
+
+```{python}
+import pandas as pd
+from itertools import combinations
+
+# Supondo que seu DataFrame seja chamado df
+df = pd.read_csv('dota2AllData.csv')
+
+# Lista de nomes de heróis (substitua esta lista pelos nomes reais dos heróis)
+nomes_herois = [str(i) for i in range(1, 114)]
+
+# Mapeamento de números de heróis para nomes
+mapeamento_herois = {str(i): heroes[i-1]["localized_name"] for i in range(1, 114)}
+
+# Selecione apenas as colunas relevantes
+colunas_herois = list(mapeamento_herois.keys())
+colunas_selecionadas = ['Vencedor'] + colunas_herois
+df = df[colunas_selecionadas]
+
+# Criação de todas as combinações possíveis de pares de heróis
+comb_pares_herois = list(combinations(colunas_herois, 2))
+
+# Dicionário para armazenar a contagem de vitórias e partidas para cada par de heróis
+contagem_vitorias_partidas = {}
+
+# Iteração sobre as combinações de pares de heróis
+for comb in comb_pares_herois:
+    heroi1, heroi2 = comb
+    df_filtrado = df[(df[heroi1] == 1) & (df[heroi2] == 1)]
+
+    ## TODO: fazer para o lado dire (-1) e somar com o radiant (1)
+    
+    # Contagem de partidas e vitórias para a combinação de heróis
+    total_partidas = len(df_filtrado)
+    vitorias = len(df_filtrado[df_filtrado['Vencedor'] == 1])
+    
+    # Adicionando ao dicionário apenas se houver pelo menos uma partida
+    if total_partidas > 0:
+        contagem_vitorias_partidas[comb] = {'Vitorias': vitorias, 'Partidas': total_partidas}
+
+# Criar uma lista classificada de combinações e taxas de vitória
+lista_classificada = sorted(contagem_vitorias_partidas.items(), key=lambda x: x[1]['Vitorias'] / x[1]['Partidas'] if x[1]['Partidas'] > 0 else 0, reverse=True)
+
+# Exibir todas as combinações e suas taxas de vitória
+for combinacao, contagem in lista_classificada:
+    taxa_vitoria = contagem['Vitorias'] / contagem['Partidas']
+    nomes_combinacao = [mapeamento_herois[heroi] for heroi in combinacao]
+    print(f"Combinação: {', '.join(nomes_combinacao)}, Vitórias: {contagem['Vitorias']}, Partidas: {contagem['Partidas']}, Taxa de Vitória: {taxa_vitoria:.2%}")
+
+```
+
