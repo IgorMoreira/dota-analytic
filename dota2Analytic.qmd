@@ -59,7 +59,7 @@ pick_rates.plot(kind='bar', ax=ax, color='skyblue')
 plt.title('Popularidade dos Heróis no Dota 2')
 plt.xlabel('Heróis')
 plt.ylabel('Popularidade')
-plt.xticks(rotation=45, ha='right')  # Rotaciona os rótulos do eixo x para facilitar a leitura
+plt.xticks(rotation=45, ha='right', fontsize=8)  # Rotaciona os rótulos do eixo x para facilitar a leitura
 plt.show()
 
 
@@ -222,10 +222,8 @@ lista_classificada_par_dire = sorted([item for item in contagem_vitorias_partida
 
 ```{python}
 
-# Dicionário para armazenar a contagem de vitórias e partidas para cada trio de heróis
 contagem_vitorias_partidas_trio_radiant = {}
 
-# Iteração sobre as combinações de pares de heróis
 for comb in comb_trios_herois:
     heroi1, heroi2, heroi3 = comb
     df_filtrado = df[(df[heroi1] == 1) & (df[heroi2] == 1) & (df[heroi3] == 1)]
@@ -238,8 +236,7 @@ for comb in comb_trios_herois:
     if total_partidas > 0:
         contagem_vitorias_partidas_trio_radiant[comb] = {'Vitorias': vitorias, 'Partidas': total_partidas}
 
-# Criar uma lista classificada de combinações e taxas de vitória
-lista_classificada_trio_radiant = sorted([item for item in contagem_vitorias_partidas_trio_radiant.items() if item[1]['Partidas'] >= 100], key=lambda x: x[1]['Vitorias'] / x[1]['Partidas'] if x[1]['Partidas'] > 0 else 0, reverse=True)
+lista_classificada_trio_radiant = sorted([item for item in contagem_vitorias_partidas_trio_radiant.items() if item[1]['Partidas'] >= 50], key=lambda x: x[1]['Vitorias'] / x[1]['Partidas'] if x[1]['Partidas'] > 0 else 0, reverse=True)
 
 
 
@@ -247,10 +244,8 @@ lista_classificada_trio_radiant = sorted([item for item in contagem_vitorias_par
 
 ```{python}
 
-# Dicionário para armazenar a contagem de vitórias e partidas para cada par de heróis
 contagem_vitorias_partidas_trio_dire = {}
 
-# Iteração sobre as combinações de pares de heróis
 for comb in comb_trios_herois:
     heroi1, heroi2, heroi3 = comb
     df_filtrado = df[(df[heroi1] == -1) & (df[heroi2] == -1) & (df[heroi3] == -1)]
@@ -263,8 +258,7 @@ for comb in comb_trios_herois:
     if total_partidas > 0:
         contagem_vitorias_partidas_trio_dire[comb] = {'Vitorias': vitorias, 'Partidas': total_partidas}
 
-# Criar uma lista classificada de combinações e taxas de vitória
-lista_classificada_trio_dire = sorted([item for item in contagem_vitorias_partidas_trio_dire.items() if item[1]['Partidas'] >= 100], key=lambda x: x[1]['Vitorias'] / x[1]['Partidas'] if x[1]['Partidas'] > 0 else 0, reverse=True)
+lista_classificada_trio_dire = sorted([item for item in contagem_vitorias_partidas_trio_dire.items() if item[1]['Partidas'] >= 50], key=lambda x: x[1]['Vitorias'] / x[1]['Partidas'] if x[1]['Partidas'] > 0 else 0, reverse=True)
 
 ```
 
@@ -431,7 +425,7 @@ ax1.bar(combinacoes_grafico, partidas_grafico, color=cores_barras, alpha=0.5, la
 # Adicionar rótulos e título
 ax1.set_xlabel('Combinação de Heróis')
 ax1.set_ylabel('Quantidade de Partidas', color='black')
-ax1.set_title('Top 10 Combinações de Heróis com Mais de 100 Partidas')
+ax1.set_title('Top 5 combinações de pares por equipe (Radiant x Dire)')
 
 # Configurar ticks e rótulos do eixo x
 ax1.set_xticks(range(len(combinacoes_grafico)))
@@ -446,7 +440,7 @@ ax2 = ax1.twinx()
 linha_taxa_vitoria = ax2.plot(combinacoes_grafico, taxas_vitoria_grafico, color='orange', marker='o', label='Taxa de Vitória')
 
 # Adicionar rótulos e título
-ax2.set_ylabel('Taxa de Vitória', color='orange')
+ax2.set_ylabel('Taxa de Vitória', color='black')
 ax2.legend(loc='upper right')
 
 # Exibir o gráfico
@@ -454,3 +448,83 @@ plt.show()
 
 
 ```
+
+
+```{python}
+import matplotlib.pyplot as plt
+import textwrap
+
+# Função para adicionar barras com rótulos
+def autolabel(rects, ax, color):
+    for rect in rects:
+        height = rect.get_height()
+        ax.annotate('{}'.format(height),
+                    xy=(rect.get_x() + rect.get_width() / 2, height),
+                    xytext=(0, 3),  # 3 points vertical offset
+                    textcoords="offset points",
+                    ha='center', va='bottom', color=color)
+
+# Listas para armazenar dados
+combinacoes_grafico_trio = []
+taxas_vitoria_grafico_trio = []
+partidas_grafico_trio = []
+cores_barras_trio = []
+
+
+# Iterar sobre as 10 melhores combinações da equipe Radiant
+for combinacao, contagem in lista_classificada_trio_radiant[:10]:
+    taxa_vitoria_radiant_trio = contagem['Vitorias'] / contagem['Partidas']
+    nomes_combinacao_trio = [mapeamento_herois[heroi] for heroi in combinacao]
+    
+    combinacoes_grafico_trio.append(', '.join(nomes_combinacao_trio)+ " ")
+    taxas_vitoria_grafico_trio.append(taxa_vitoria_radiant_trio)
+    partidas_grafico_trio.append(contagem['Partidas'])
+    cores_barras.append('green')
+
+# Iterar sobre as 10 melhores combinações da equipe Dire
+for combinacao, contagem in lista_classificada_trio_dire[:10]:
+        taxa_vitoria_dire_trio = contagem['Vitorias'] / contagem['Partidas']
+        nomes_combinacao_trio = [mapeamento_herois[heroi] for heroi in combinacao]
+
+        combinacoes_grafico_trio.append(', '.join(nomes_combinacao_trio))
+        taxas_vitoria_grafico_trio.append(taxa_vitoria_dire_trio)
+        partidas_grafico_trio.append(contagem['Partidas'])
+        cores_barras.append('red')
+
+
+
+# Criar gráfico de barras consolidado
+fig, ax1 = plt.subplots(figsize=(14, 8))
+
+# Barra para a quantidade de partidas
+ax1.bar(combinacoes_grafico_trio, partidas_grafico_trio, color=cores_barras, alpha=0.5)
+
+# Adicionar rótulos e título
+ax1.set_xlabel('Combinação de Heróis')
+ax1.set_ylabel('Quantidade de Partidas', color='black')
+ax1.set_title('Top 5 combinações de trios por equipe (Radiant x Dire)')
+
+# Configurar ticks e rótulos do eixo x
+ax1.set_xticks(range(len(combinacoes_grafico_trio)))
+wrapped_labels = [textwrap.fill(label, width=20) for label in combinacoes_grafico_trio]
+ax1.set_xticklabels(wrapped_labels, rotation=45, ha='right', fontsize=8)
+
+# Adicionar legenda
+ax1.legend(loc='upper left')
+
+# Configurar eixo y secundário para a taxa de vitória
+ax2 = ax1.twinx()
+linha_taxa_vitoria_trio = ax2.plot(combinacoes_grafico_trio, taxas_vitoria_grafico_trio, color='orange', marker='o', label='Taxa de Vitória')
+
+# Adicionar rótulos e título
+ax2.set_ylabel('Taxa de Vitória', color='black')
+ax2.legend(loc='upper right')
+# Exibir o gráfico
+plt.show()
+
+
+```
+
+Machine learning models for DOTA 2 outcomes
+prediction
+Kodirjon Akhmedov and Anh Huy Phan
