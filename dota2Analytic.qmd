@@ -52,14 +52,15 @@ pick_rates = df_herois[df_herois != 0].count() / len(df_herois)
 
 # Substituindo os rótulos do eixo x pelos nomes dos heróis do mapeamento
 pick_rates.index = pick_rates.index.astype(str).map(mapeamento_herois, na_action='ignore')
+plt.style.use('dark_background')
 
 # Criando um gráfico de barras para a popularidade dos heróis
-fig, ax = plt.subplots(figsize=(20, 8))
+fig, ax = plt.subplots(figsize=(30, 12))
 pick_rates.plot(kind='bar', ax=ax, color='skyblue')
-plt.title('Popularidade dos Heróis no Dota 2')
 plt.xlabel('Heróis')
 plt.ylabel('Popularidade')
 plt.xticks(rotation=45, ha='right', fontsize=8)  # Rotaciona os rótulos do eixo x para facilitar a leitura
+plt.style.use("dark_background")
 plt.show()
 
 
@@ -90,7 +91,7 @@ total_partidas = train_data.iloc[:, 0].count()
 # Calcula taxa de vitória para as equipes 1 e -1
 vitorias_radiant = train_data[train_data.iloc[:, 0] == 1].iloc[:, 0].count()
 vitorias_dire = train_data[train_data.iloc[:, 0] == -1].iloc[:, 0].count()
-
+plt.style.use('dark_background')
 # Criar gráfico de barras
 fig, ax = plt.subplots()
 ax.bar(['Radiant (1)', 'Dire (-1)'], [vitorias_radiant, vitorias_dire], color=['blue', 'red'])
@@ -116,7 +117,7 @@ total_partidas = test_data.iloc[:, 0].count()
 # Calcular a taxa de vitória para as equipes 1 e -1
 vitorias_radiant = test_data[test_data.iloc[:, 0] == 1].iloc[:, 0].count()
 vitorias_dire = test_data[test_data.iloc[:, 0] == -1].iloc[:, 0].count()
-
+plt.style.use('dark_background')
 # Criar gráfico de barras
 fig, ax = plt.subplots()
 ax.bar(['Radiant (1)', 'Dire (-1)'], [vitorias_radiant, vitorias_dire], color=['blue', 'red'])
@@ -347,7 +348,7 @@ bar_partidas = ax1.bar(combinacoes_grafico_par_radiant, partidas_grafico_par_rad
 for bar, valor in zip(bar_partidas, partidas_grafico_par_radiant):
     height = bar.get_height()
     ax1.text(bar.get_x() + bar.get_width() / 2, height, f'{valor}', ha='center', va='bottom', fontsize=8)
-
+plt.style.use('dark_background')
 # Eixo y secundário para a taxa de vitória
 ax2 = ax1.twinx()
 ax2.plot(combinacoes_grafico_par_radiant, taxas_vitoria_grafico_par_radiant, color='orange', marker='o', label='Taxa de Vitória')
@@ -371,8 +372,7 @@ ax1.set_xticklabels(wrapped_labels, rotation=45, ha='right', fontsize=9)
 plt.show()
 ```
 
-
-
+#Top 5 duplas com mais de 100 partidas
 ```{python}
 import matplotlib.pyplot as plt
 import textwrap
@@ -415,7 +415,7 @@ for combinacao, contagem in lista_classificada_par_dire[:10]:
         cores_barras.append('red')
 
 
-
+plt.style.use('dark_background')
 # Criar gráfico de barras consolidado
 fig, ax1 = plt.subplots(figsize=(14, 8))
 
@@ -425,7 +425,7 @@ ax1.bar(combinacoes_grafico, partidas_grafico, color=cores_barras, alpha=0.5, la
 # Adicionar rótulos e título
 ax1.set_xlabel('Combinação de Heróis')
 ax1.set_ylabel('Quantidade de Partidas', color='black')
-ax1.set_title('Top 5 combinações de pares por equipe (Radiant x Dire)')
+# ax1.set_title('Top 5 combinações de pares por equipe (Radiant x Dire)')
 
 # Configurar ticks e rótulos do eixo x
 ax1.set_xticks(range(len(combinacoes_grafico)))
@@ -449,7 +449,84 @@ plt.show()
 
 ```
 
+#Piores 5 duplas com mais de 100 partidas
+```{python}
+import matplotlib.pyplot as plt
+import textwrap
 
+# Função para adicionar barras com rótulos
+def autolabel(rects, ax, color):
+    for rect in rects:
+        height = rect.get_height()
+        ax.annotate('{}'.format(height),
+                    xy=(rect.get_x() + rect.get_width() / 2, height),
+                    xytext=(0, 3),  # 3 points vertical offset
+                    textcoords="offset points",
+                    ha='center', va='bottom', color=color)
+
+# Listas para armazenar dados
+combinacoes_grafico = []
+taxas_vitoria_grafico = []
+partidas_grafico = []
+cores_barras = []
+
+
+# Iterar sobre as 10 melhores combinações da equipe Radiant
+for combinacao, contagem in lista_classificada_par_radiant[-10:]:
+    taxa_vitoria_radiant = contagem['Vitorias'] / contagem['Partidas']
+    nomes_combinacao = [mapeamento_herois[heroi] for heroi in combinacao]
+    
+    combinacoes_grafico.append(', '.join(nomes_combinacao))
+    taxas_vitoria_grafico.append(taxa_vitoria_radiant)
+    partidas_grafico.append(contagem['Partidas'])
+    cores_barras.append('green')
+
+# Iterar sobre as 10 melhores combinações da equipe Dire
+for combinacao, contagem in lista_classificada_par_dire[-10:]:
+        taxa_vitoria_dire = contagem['Vitorias'] / contagem['Partidas']
+        nomes_combinacao = [mapeamento_herois[heroi] for heroi in combinacao]
+
+        combinacoes_grafico.append(', '.join(nomes_combinacao) + ' ')
+        taxas_vitoria_grafico.append(taxa_vitoria_dire)
+        partidas_grafico.append(contagem['Partidas'])
+        cores_barras.append('red')
+
+
+plt.style.use('dark_background')
+# Criar gráfico de barras consolidado
+fig, ax1 = plt.subplots(figsize=(14, 8))
+
+# Barra para a quantidade de partidas
+ax1.bar(combinacoes_grafico, partidas_grafico, color=cores_barras, alpha=0.5, label='Partidas')
+
+# Adicionar rótulos e título
+ax1.set_xlabel('Combinação de Heróis')
+ax1.set_ylabel('Quantidade de Partidas', color='black')
+# ax1.set_title('Top 5 combinações de pares por equipe (Radiant x Dire)')
+
+# Configurar ticks e rótulos do eixo x
+ax1.set_xticks(range(len(combinacoes_grafico)))
+wrapped_labels = [textwrap.fill(label, width=20) for label in combinacoes_grafico]
+ax1.set_xticklabels(wrapped_labels, rotation=45, ha='right', fontsize=8)
+
+# Adicionar legenda
+ax1.legend(loc='upper left')
+
+# Configurar eixo y secundário para a taxa de vitória
+ax2 = ax1.twinx()
+linha_taxa_vitoria = ax2.plot(combinacoes_grafico, taxas_vitoria_grafico, color='orange', marker='o', label='Taxa de Vitória')
+
+# Adicionar rótulos e título
+ax2.set_ylabel('Taxa de Vitória', color='black')
+ax2.legend(loc='upper right')
+
+# Exibir o gráfico
+plt.show()
+
+
+```
+
+#Top 5 trios com mais de 50 partidas 
 ```{python}
 import matplotlib.pyplot as plt
 import textwrap
@@ -492,7 +569,7 @@ for combinacao, contagem in lista_classificada_trio_dire[:10]:
         cores_barras.append('red')
 
 
-
+plt.style.use('dark_background')
 # Criar gráfico de barras consolidado
 fig, ax1 = plt.subplots(figsize=(14, 8))
 
@@ -502,7 +579,86 @@ ax1.bar(combinacoes_grafico_trio, partidas_grafico_trio, color=cores_barras, alp
 # Adicionar rótulos e título
 ax1.set_xlabel('Combinação de Heróis')
 ax1.set_ylabel('Quantidade de Partidas', color='black')
-ax1.set_title('Top 5 combinações de trios por equipe (Radiant x Dire)')
+# ax1.set_title('Top 5 combinações de trios por equipe (Radiant x Dire)')
+
+# Configurar ticks e rótulos do eixo x
+ax1.set_xticks(range(len(combinacoes_grafico_trio)))
+wrapped_labels = [textwrap.fill(label, width=20) for label in combinacoes_grafico_trio]
+ax1.set_xticklabels(wrapped_labels, rotation=45, ha='right', fontsize=8)
+
+# Adicionar legenda
+ax1.legend(loc='upper left')
+
+# Configurar eixo y secundário para a taxa de vitória
+ax2 = ax1.twinx()
+linha_taxa_vitoria_trio = ax2.plot(combinacoes_grafico_trio, taxas_vitoria_grafico_trio, color='orange', marker='o', label='Taxa de Vitória')
+
+# Adicionar rótulos e título
+ax2.set_ylabel('Taxa de Vitória', color='black')
+ax2.legend(loc='upper right')
+# Exibir o gráfico
+plt.show()
+
+
+```
+
+
+
+
+#Piores 5 trios com mais de 50 partidas 
+```{python}
+import matplotlib.pyplot as plt
+import textwrap
+
+# Função para adicionar barras com rótulos
+def autolabel(rects, ax, color):
+    for rect in rects:
+        height = rect.get_height()
+        ax.annotate('{}'.format(height),
+                    xy=(rect.get_x() + rect.get_width() / 2, height),
+                    xytext=(0, 3),  # 3 points vertical offset
+                    textcoords="offset points",
+                    ha='center', va='bottom', color=color)
+
+# Listas para armazenar dados
+combinacoes_grafico_trio = []
+taxas_vitoria_grafico_trio = []
+partidas_grafico_trio = []
+cores_barras_trio = []
+
+
+# Iterar sobre as 10 melhores combinações da equipe Radiant
+for combinacao, contagem in lista_classificada_trio_radiant[-10:]:
+    taxa_vitoria_radiant_trio = contagem['Vitorias'] / contagem['Partidas']
+    nomes_combinacao_trio = [mapeamento_herois[heroi] for heroi in combinacao]
+    
+    combinacoes_grafico_trio.append(', '.join(nomes_combinacao_trio)+ " ")
+    taxas_vitoria_grafico_trio.append(taxa_vitoria_radiant_trio)
+    partidas_grafico_trio.append(contagem['Partidas'])
+    cores_barras.append('green')
+
+# Iterar sobre as 10 melhores combinações da equipe Dire
+for combinacao, contagem in lista_classificada_trio_dire[-10:]:
+        taxa_vitoria_dire_trio = contagem['Vitorias'] / contagem['Partidas']
+        nomes_combinacao_trio = [mapeamento_herois[heroi] for heroi in combinacao]
+
+        combinacoes_grafico_trio.append(', '.join(nomes_combinacao_trio) + ' ')
+        taxas_vitoria_grafico_trio.append(taxa_vitoria_dire_trio)
+        partidas_grafico_trio.append(contagem['Partidas'])
+        cores_barras.append('red')
+
+
+plt.style.use('dark_background')
+# Criar gráfico de barras consolidado
+fig, ax1 = plt.subplots(figsize=(14, 8))
+
+# Barra para a quantidade de partidas
+ax1.bar(combinacoes_grafico_trio, partidas_grafico_trio, color=cores_barras, alpha=0.5)
+
+# Adicionar rótulos e título
+ax1.set_xlabel('Combinação de Heróis')
+ax1.set_ylabel('Quantidade de Partidas', color='black')
+# ax1.set_title('Top 5 combinações de trios por equipe (Radiant x Dire)')
 
 # Configurar ticks e rótulos do eixo x
 ax1.set_xticks(range(len(combinacoes_grafico_trio)))
